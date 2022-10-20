@@ -80,7 +80,7 @@ func TestSubscribeAddress_MATIC(t *testing.T) {
 		return
 	}
 	scanner.SetBlockScanTargetFuncV2(testScanTargetFunc(symbol))
-	scanner.SetRescanBlockHeight(28662000)
+	scanner.SetRescanBlockHeight(28680665)
 	scanner.Run()
 
 	<-endRunning

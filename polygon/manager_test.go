@@ -181,3 +181,13 @@ func TestWalletManager_DecodeReceiptLogResult(t *testing.T) {
 	log.Infof("name: %+v", name)
 	log.Infof("rJSON: %s", rJSON)
 }
+
+func TestWalletManager_LoadContractInfo(t *testing.T) {
+	wm := testNewWalletManager()
+	contract := wm.LoadContractInfo("0x9fAef544a1c9a3cCAB003174bb62A32e3AaaB719")
+	if contract == nil {
+		t.Errorf("LoadContractInfo error")
+		return
+	}
+	log.Infof("contract: %+v", contract)
+}
