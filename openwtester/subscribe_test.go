@@ -40,15 +40,15 @@ func (sub *subscriberSingle) BlockScanNotify(header *openwallet.BlockHeader) err
 func (sub *subscriberSingle) BlockExtractDataNotify(sourceKey string, data *openwallet.TxExtractData) error {
 	log.Notice("account:", sourceKey)
 
-	for i, input := range data.TxInputs {
-		log.Std.Notice("data.TxInputs[%d]: %+v", i, input)
-	}
-
-	for i, output := range data.TxOutputs {
-		log.Std.Notice("data.TxOutputs[%d]: %+v", i, output)
-	}
-
-	log.Std.Notice("data.Transaction: %+v", data.Transaction)
+	//for i, input := range data.TxInputs {
+	//	log.Std.Notice("data.TxInputs[%d]: %+v", i, input)
+	//}
+	//
+	//for i, output := range data.TxOutputs {
+	//	log.Std.Notice("data.TxOutputs[%d]: %+v", i, output)
+	//}
+	//
+	//log.Std.Notice("data.Transaction: %+v", data.Transaction)
 
 	return nil
 }
@@ -57,10 +57,19 @@ func (sub *subscriberSingle) BlockExtractDataNotify(sourceKey string, data *open
 func (sub *subscriberSingle) BlockExtractSmartContractDataNotify(sourceKey string, data *openwallet.SmartContractReceipt) error {
 
 	log.Notice("sourceKey:", sourceKey)
-	log.Std.Notice("data.ContractTransaction: %+v", data)
+	//log.Std.Notice("data.ContractTransaction: %+v", data)
 
 	for i, event := range data.Events {
-		log.Std.Notice("data.Events[%d]: %+v", i, event)
+		//log.Std.Notice("data.Events[%d]: %+v", i, event)
+		assetsMgr, err := openw.GetAssetsAdapter(data.Coin.Symbol)
+		if err != nil {
+			log.Error(data.Coin.Symbol, "is not support")
+			return nil
+		}
+		nftTx, _ := assetsMgr.GetNFTContractDecoder().GetNFTTransfer(event)
+		if nftTx != nil {
+			log.Std.Notice("NFT Transfer[%d]: %+v", i, nftTx)
+		}
 	}
 
 	return nil
@@ -80,7 +89,7 @@ func TestSubscribeAddress_MATIC(t *testing.T) {
 		return
 	}
 	scanner.SetBlockScanTargetFuncV2(testScanTargetFunc(symbol))
-	scanner.SetRescanBlockHeight(28680665)
+	scanner.SetRescanBlockHeight(34888568)
 	scanner.Run()
 
 	<-endRunning
@@ -90,7 +99,7 @@ func TestBlockScanner_ExtractTransactionAndReceiptData(t *testing.T) {
 
 	var (
 		symbol = "MATIC"
-		txid   = "0x0462f8db1152c6f1d184fb7947e021a10bb1265758ac24d59a7bcb237bee08e6"
+		txid   = "0xee65b06f884a5a0453dd236a47c1170dd773860f5d96c22cb3e2a86f10a977fa"
 	)
 
 	scanner := testBlockScanner(symbol)
@@ -124,10 +133,10 @@ func TestBlockScanner_ExtractTransactionAndReceiptData(t *testing.T) {
 
 	for sourceKey, keyData := range contractResult {
 		log.Notice("sourceKey:", sourceKey)
-		log.Std.Notice("data.ContractTransaction: %+v", keyData)
+		//log.Std.Notice("data.ContractTransaction: %+v", keyData)
 
 		for i, event := range keyData.Events {
-			log.Std.Notice("data.Contract[%d]: %+v", i, event.Contract)
+			//log.Std.Notice("data.Contract[%d]: %+v", i, event.Contract)
 			log.Std.Notice("data.Events[%d]: %+v", i, event)
 		}
 	}
@@ -142,11 +151,11 @@ func testScanTargetFunc(symbol string) openwallet.BlockScanTargetFuncV2 {
 	//添加监听的合约地址
 	contract := &openwallet.SmartContract{
 		Symbol:   symbol,
-		Address:  "0xdac17f958d2ee523a2206206994597c13d831ec7",
-		Decimals: 2,
+		Address:  "0x2953399124F0cBB46d2CbACD8A89cF0599974963",
+		Decimals: 0,
 	}
 	contract.ContractID = openwallet.GenContractID(contract.Symbol, contract.Address)
-	//contract.SetABI(quorum.ERC20_ABI_JSON)
+	contract.SetABI(`[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"indexed":false,"internalType":"uint256[]","name":"values","type":"uint256[]"}],"name":"TransferBatch","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"TransferSingle","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"value","type":"string"},{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"}],"name":"URI","type":"event"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"amounts","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeBatchTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"uri","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}]`)
 	contracts[contract.Address] = openwallet.ScanTargetResult{SourceKey: contract.ContractID, Exist: true, TargetInfo: contract}
 
 	//添加监听的外部地址
@@ -204,4 +213,24 @@ func testBlockScanner(symbol string) openwallet.BlockScanner {
 	scanner.AddObserver(&sub)
 
 	return scanner
+}
+
+func TestScanHeight_MATIC(t *testing.T) {
+
+	var (
+		//endRunning = make(chan bool, 1)
+		symbol = "MATIC"
+	)
+
+	scanner := testBlockScanner(symbol)
+
+	if scanner == nil {
+		log.Error(symbol, "is not support block scan")
+		return
+	}
+	scanner.SetBlockScanTargetFuncV2(testScanTargetFunc(symbol))
+	scanner.ScanBlock(34888568)
+	//scanner.Run()
+
+	//<-endRunning
 }
