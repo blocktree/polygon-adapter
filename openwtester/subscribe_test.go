@@ -99,13 +99,18 @@ func TestBlockScanner_ExtractTransactionAndReceiptData(t *testing.T) {
 
 	var (
 		symbol = "MATIC"
-		txid   = "0xee65b06f884a5a0453dd236a47c1170dd773860f5d96c22cb3e2a86f10a977fa"
+		txid   = "0x770324b9ea445e469c874af0d95afa41f217816681c4a59d2d9b8cd503394285"
 	)
 
 	scanner := testBlockScanner(symbol)
 
 	if scanner == nil {
 		log.Error(symbol, "is not support block scan")
+		return
+	}
+	assetsMgr, err := openw.GetAssetsAdapter(symbol)
+	if err != nil {
+		log.Error(symbol, "is not support")
 		return
 	}
 
@@ -137,7 +142,20 @@ func TestBlockScanner_ExtractTransactionAndReceiptData(t *testing.T) {
 
 		for i, event := range keyData.Events {
 			//log.Std.Notice("data.Contract[%d]: %+v", i, event.Contract)
-			log.Std.Notice("data.Events[%d]: %+v", i, event)
+			//log.Std.Notice("data.Events[%d]: %+v", i, event)
+
+			nftTx, _ := assetsMgr.GetNFTContractDecoder().GetNFTTransfer(event)
+			if nftTx != nil {
+				log.Std.Notice("NFT Transfer[%d]: %+v", i, nftTx)
+				for _, token := range nftTx.Tokens {
+					metaData, err := assetsMgr.GetNFTContractDecoder().GetMetaDataOfNFT(&token)
+					if err != nil {
+						continue
+					}
+					log.Std.Notice("MetaData: %s", metaData.URI)
+				}
+
+			}
 		}
 	}
 }

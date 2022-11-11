@@ -48,12 +48,12 @@ func TestWalletManager_erc721_GetNFTOwnerByTokenID(t *testing.T) {
 	wm := testNewWalletManager()
 
 	nft := &openwallet.NFT{
-		Symbol:   "ETH",
-		Address:  "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+		Symbol:   "MATIC",
+		Address:  "0xd06e0B47590524fB71B4376e0e33121E1FecA59b",
 		Token:    "BoredApe",
 		Name:     "BoredApeYachtClub",
 		Protocol: openwallet.InterfaceTypeERC721,
-		TokenID:  "5493",
+		TokenID:  "17",
 	}
 	owner, err := wm.NFTContractDecoder.GetNFTOwnerByTokenID(nft)
 	if err != nil {
@@ -67,12 +67,12 @@ func TestWalletManager_erc721_GetMetaDataOfNFT(t *testing.T) {
 	wm := testNewWalletManager()
 
 	nft := &openwallet.NFT{
-		Symbol:   "ETH",
-		Address:  "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+		Symbol:   "MATIC",
+		Address:  "0xa9a6A3626993D487d2Dbda3173cf58cA1a9D9e9f",
 		Token:    "BoredApe",
 		Name:     "BoredApeYachtClub",
 		Protocol: openwallet.InterfaceTypeERC721,
-		TokenID:  "5493",
+		TokenID:  "70896956981184851581321532800687988425857312602350892973165295709508807380691",
 	}
 	metaData, err := wm.NFTContractDecoder.GetMetaDataOfNFT(nft)
 	if err != nil {
